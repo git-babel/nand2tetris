@@ -27,8 +27,8 @@
 // if (out < 0) set ng = 1
 
 CHIP ALU {
-    IN  
-        x[16], y[16],  // 16-bit inputs        
+    IN
+        x[16], y[16],  // 16-bit inputs
         zx, // zero the x input?
         nx, // negate the x input?
         zy, // zero the y input?
@@ -36,11 +36,36 @@ CHIP ALU {
         f,  // compute out = x + y (if 1) or x & y (if 0)
         no; // negate the out output?
 
-    OUT 
+    OUT
         out[16], // 16-bit output
         zr, // 1 if (out == 0), 0 otherwise
         ng; // 1 if (out < 0),  0 otherwise
 
     PARTS:
-   // Put you code here:
+    // apply stat to x
+    Mux16(a=x[0..15], b[0..15]=false, sel=zx, out=za);
+    Not16(in=za, out=nza);
+    Mux16(a=za, b=nza, sel=nx, out=statx);
+
+    // apply stat to y
+    Mux16(a=y[0..15], b[0..15]=false, sel=zy, out=zb);
+    Not16(in=zb, out=nzb);
+    Mux16(a=zb, b=nzb, sel=ny, out=staty);
+
+    // Add or And Multiplexer
+    Add16(a=statx, b=staty, out=addo);
+    And16(a=statx, b=staty, out=ando);
+    Mux16(a=ando, b=addo, sel=f, out=tmpout);
+
+    // apply no stat to tmpout
+    Not16(in=tmpout, out=ntmpout);
+    Mux16(a=tmpout, b=ntmpout, sel=no, out=out, out[0..7]=th, out[8..15]=dh,
+    out[15]=msb);
+
+    // set zr and ng flags
+    Or8Way(in=th, out=oro1);
+    Or8Way(in=dh, out=oro2);
+    Or(a=oro1, b=oro2, out=orout);
+    Not(in=orout, out=zr);
+    And(a=msb, b=true, out=ng);
 }
