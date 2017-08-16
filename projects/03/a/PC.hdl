@@ -16,5 +16,15 @@ CHIP PC {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+    // calc the results for each case
+    And16(a[0..15]=false, b[0..15]=false, out=reseto);
+    Inc16(in=pout, out=inco);
+
+    // Mux series
+    Mux16(a=pout, b=inco, sel=inc, out=o0);
+    Mux16(a=o0, b=in, sel=load, out=o1);
+    Mux16(a=o1, b=reseto, sel=reset, out=aout);
+
+    // update register
+    Register(in=aout, load=true, out=out, out=pout);
 }

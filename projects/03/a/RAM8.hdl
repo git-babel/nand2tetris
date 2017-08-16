@@ -15,5 +15,29 @@ CHIP RAM8 {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+    // choose RAM[address]-th memory
+    DMux8Way(in=true, sel=address, a=m0, b=m1, c=m2, d=m3, e=m4, f=m5, g=m6,
+    h=m7);
+    And(a=m0, b=load, out=c0);
+    And(a=m1, b=load, out=c1);
+    And(a=m2, b=load, out=c2);
+    And(a=m3, b=load, out=c3);
+    And(a=m4, b=load, out=c4);
+    And(a=m5, b=load, out=c5);
+    And(a=m6, b=load, out=c6);
+    And(a=m7, b=load, out=c7);
+
+    // update selected register
+    Register(in=in, load=c0, out=m0o);
+    Register(in=in, load=c1, out=m1o);
+    Register(in=in, load=c2, out=m2o);
+    Register(in=in, load=c3, out=m3o);
+    Register(in=in, load=c4, out=m4o);
+    Register(in=in, load=c5, out=m5o);
+    Register(in=in, load=c6, out=m6o);
+    Register(in=in, load=c7, out=m7o);
+
+    // return selected register value
+    Mux8Way16(a=m0o, b=m1o, c=m2o, d=m3o, e=m4o, f=m5o, g=m6o, h=m7o,
+    sel=address, out=out);
 }
